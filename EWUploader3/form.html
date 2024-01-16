@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <title>Subir Archivo</title>
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      margin: 20px;
+      background-color: #f2f2f2;
+    }
+
+    .container {
+      max-width: 460px;
+      margin: 0 auto;
+      background-color: #fff;
+      padding: 20px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      position: relative;
+    }
+
+    h1 {
+      color: #333;
+      text-align: center;
+    }
+
+    form {
+      margin-top: 20px;
+    }
+
+    input[type="text"],
+    input[type="password"],
+    input[type="file"] {
+      width: 100%;
+      padding: 10px;
+      margin: 8px 0;
+      display: inline-block;
+      border: 1px solid #ccc;
+      box-sizing: border-box;
+      border-radius: 3px;
+    }
+
+    input[type="button"] {
+      background-color: #444;
+      color: white;
+      padding: 14px 15px;
+      margin: 10px 0;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      width: 100%;
+    }
+
+    input[type="button"]:hover {
+      background-color: #888;
+    }
+
+    #output {
+      margin-top: 20px;
+      color: #333;
+      text-align: center;
+    }
+
+    #output2 {
+      margin-top: 20px;
+      color: #333;
+      text-align: center;
+    }
+    
+    .loader {
+      border: 8px solid #f3f3f3;
+      border-top: 8px solid #3498db;
+      border-radius: 50%;
+      width: 30px;
+      height: 30px;
+      animation: spin 1s linear infinite;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      margin-top: -15px;
+      margin-left: -15px;
+      display: none;
+    }
+
+    @keyframes spin {
+      0% {
+        transform: rotate(0deg);
+      }
+
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <h1>Subir Archivo a Google Drive</h1>
+    <div id="output"></div>
+    <form id="uploadForm">
+      <input type="text" name="fileName" id="fileName" placeholder="Nombre de archivo">
+      <input type="text" name="folderId" id="folderId" placeholder="ID de la carpeta de Google Drive">
+      <input type="text" name="spreadsheetId" id="spreadsheetId" placeholder="ID de la hoja de cálculo">
+      <input type="text" name="sheetName" id="sheetName" placeholder="Nombre de la pestaña">
+      <input type="file" name="fileImage" id="fileImage" multiple>
+      <input type="button" id="subButton" value="Enviar">
+      <div class="loader" id="loader"></div>
+    </form>
+  </div>
+
+  <div class="container">
+    <h1>Subir Archivo a Wordpress</h1>
+    <div id="output2"></div>
+    <form id="uploadForm2">
+      <input type="text" name="fileName2" id="fileName2" placeholder="Nombre de archivo">
+      <input type="text" name="folderId2" id="folderId2" placeholder="ID de la carpeta de Google Drive">
+      <input type="text" name="spreadsheetId2" id="spreadsheetId2" placeholder="ID de la hoja de cálculo">
+      <input type="text" name="sheetName2" id="sheetName2" placeholder="Nombre de la pestaña">
+      <input type="file" name="fileImage2" id="fileImage2" multiple>
+      <input type="text" name="url" id="url" placeholder="Url de Wordpress">
+      <input type="text" name="username" id="username" placeholder="Usuario de Wordpress">
+      <input type="password" name="password" id="password" placeholder="Contraseña de Wordpress">
+      <input type="button" id="subButton2" value="Enviar">
+      <div class="loader" id="loader"></div>
+    </form>
+  </div>
+
+  <script>
+    const fileName = document.getElementById('fileName');
+    const folderId = document.getElementById('folderId');
+    const spreadsheetId = document.getElementById('spreadsheetId');
+    const sheetName = document.getElementById('sheetName');
+    const fileImageInput = document.getElementById('fileImage');
+
+    const fileName2 = document.getElementById('fileName2');
+    const folderId2 = document.getElementById('folderId2');
+    const spreadsheetId2 = document.getElementById('spreadsheetId2');
+    const sheetName2 = document.getElementById('sheetName2');
+    const fileImageInput2 = document.getElementById('fileImage2');
+
+    const urlInput = document.getElementById('url');
+    const usernameInput = document.getElementById('username');
+    const passwordInput = document.getElementById('password');
+
+    const output = document.getElementById('output');
+    const output2 = document.getElementById('output2');
+    const loader = document.getElementById('loader');
+
+    document.getElementById('subButton').addEventListener('click', function(e) {
+      e.preventDefault();
+
+      if (!fileName.value || !fileImageInput.files[0] || !folderId.value || !spreadsheetId.value || !sheetName.value) {
+        output.innerHTML = 'Completa todos los campos.';
+        return;
+      }
+
+      output.innerHTML = fileName.value;
+      loader.style.display = 'inline-block';
+
+      google.script.run.withSuccessHandler(onSuccess).uploadToDrive(this.parentNode);
+    });
+
+    document.getElementById('subButton2').addEventListener('click', function(e) {
+      e.preventDefault();
+
+      if (!fileName2.value || !fileImageInput2.files[0]) {
+        output2.innerHTML = 'Completa todos los campos.';
+        return;
+      }
+
+      output2.innerHTML = fileName2.value;
+      loader.style.display = 'inline-block';
+
+      google.script.run.withSuccessHandler(onSuccess).uploadToWordPress(this.parentNode);
+    });
+
+    function onSuccess(data) {
+      loader.style.display = 'none';
+
+      if (data.status) {
+        output.innerHTML = 'Archivo cargado con éxito <br> <a href="' + data.url + '" target="_blank">' + data.url + '</a>';
+      } else {
+        output.innerHTML = 'Error: ' + data.error;
+      }
+    }
+
+    function onSuccess2(data) {
+      loader.style.display = 'none';
+
+      if (data.status) {
+        output2.innerHTML = 'Archivo cargado con éxito <br> <a href="' + data.url + '" target="_blank">' + data.url + '</a>';
+      } else {
+        output2.innerHTML = 'Error: ' + data.error;
+      }
+    }
+  </script>
+</body>
+
+</html>
