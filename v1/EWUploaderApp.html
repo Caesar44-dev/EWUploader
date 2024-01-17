@@ -69,7 +69,7 @@
       color: #333;
       text-align: center;
     }
-    
+
     .loader {
       border: 8px solid #f3f3f3;
       border-top: 8px solid #3498db;
@@ -102,7 +102,6 @@
     <h1>Subir Archivo a Google Drive</h1>
     <div id="output"></div>
     <form id="uploadForm">
-      <input type="text" name="fileName" id="fileName" placeholder="Nombre de archivo">
       <input type="text" name="folderId" id="folderId" placeholder="ID de la carpeta de Google Drive">
       <input type="text" name="spreadsheetId" id="spreadsheetId" placeholder="ID de la hoja de cálculo">
       <input type="text" name="sheetName" id="sheetName" placeholder="Nombre de la pestaña">
@@ -116,7 +115,6 @@
     <h1>Subir Archivo a Wordpress</h1>
     <div id="output2"></div>
     <form id="uploadForm2">
-      <input type="text" name="fileName2" id="fileName2" placeholder="Nombre de archivo">
       <input type="text" name="folderId2" id="folderId2" placeholder="ID de la carpeta de Google Drive">
       <input type="text" name="spreadsheetId2" id="spreadsheetId2" placeholder="ID de la hoja de cálculo">
       <input type="text" name="sheetName2" id="sheetName2" placeholder="Nombre de la pestaña">
@@ -130,13 +128,11 @@
   </div>
 
   <script>
-    const fileName = document.getElementById('fileName');
     const folderId = document.getElementById('folderId');
     const spreadsheetId = document.getElementById('spreadsheetId');
     const sheetName = document.getElementById('sheetName');
     const fileImageInput = document.getElementById('fileImage');
 
-    const fileName2 = document.getElementById('fileName2');
     const folderId2 = document.getElementById('folderId2');
     const spreadsheetId2 = document.getElementById('spreadsheetId2');
     const sheetName2 = document.getElementById('sheetName2');
@@ -152,30 +148,26 @@
 
     document.getElementById('subButton').addEventListener('click', function(e) {
       e.preventDefault();
-
-      if (!fileName.value || !fileImageInput.files[0] || !folderId.value || !spreadsheetId.value || !sheetName.value) {
+      if (!fileImageInput.files[0] || !folderId.value || !spreadsheetId.value || !sheetName.value) {
         output.innerHTML = 'Completa todos los campos.';
         return;
       }
-
-      output.innerHTML = fileName.value;
+      const fileName = fileImageInput.files[0].name; // Obtener el nombre del archivo correctamente
+      output.innerHTML = fileName;
       loader.style.display = 'inline-block';
-
       google.script.run.withSuccessHandler(onSuccess).uploadToDrive(this.parentNode);
     });
 
     document.getElementById('subButton2').addEventListener('click', function(e) {
       e.preventDefault();
-
-      if (!fileName2.value || !fileImageInput2.files[0]) {
+      if (!fileImageInput2.files[0]) {
         output2.innerHTML = 'Completa todos los campos.';
         return;
       }
-
-      output2.innerHTML = fileName2.value;
+      const fileName2 = fileImageInput2.files[0].name; // Obtener el nombre del archivo correctamente
+      output2.innerHTML = fileName2;
       loader.style.display = 'inline-block';
-
-      google.script.run.withSuccessHandler(onSuccess).uploadToWordPress(this.parentNode);
+      google.script.run.withSuccessHandler(onSuccess2).uploadToWordPress(this.parentNode);
     });
 
     function onSuccess(data) {
