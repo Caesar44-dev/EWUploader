@@ -99,30 +99,16 @@
 
 <body>
   <div class="container">
-    <h1>Subir Archivo a Google Drive</h1>
-    <div id="output"></div>
+    <h1>Subir Archivos</h1>
     <form id="uploadForm">
       <input type="text" name="folderId" id="folderId" placeholder="ID de la carpeta de Google Drive">
       <input type="text" name="spreadsheetId" id="spreadsheetId" placeholder="ID de la hoja de cálculo">
       <input type="text" name="sheetName" id="sheetName" placeholder="Nombre de la pestaña">
+      <div id="output"></div>
       <input type="file" name="fileImage" id="fileImage" multiple>
-      <input type="button" id="subButton" value="Enviar">
-      <div class="loader" id="loader"></div>
-    </form>
-  </div>
-
-  <div class="container">
-    <h1>Subir Archivo a Wordpress</h1>
-    <div id="output2"></div>
-    <form id="uploadForm2">
-      <input type="text" name="folderId2" id="folderId2" placeholder="ID de la carpeta de Google Drive">
-      <input type="text" name="spreadsheetId2" id="spreadsheetId2" placeholder="ID de la hoja de cálculo">
-      <input type="text" name="sheetName2" id="sheetName2" placeholder="Nombre de la pestaña">
+      <div id="output2"></div>
       <input type="file" name="fileImage2" id="fileImage2" multiple>
-      <input type="text" name="url" id="url" placeholder="Url de Wordpress">
-      <input type="text" name="username" id="username" placeholder="Usuario de Wordpress">
-      <input type="password" name="password" id="password" placeholder="Contraseña de Wordpress">
-      <input type="button" id="subButton2" value="Enviar">
+      <input type="button" id="subButton" value="Enviar">
       <div class="loader" id="loader"></div>
     </form>
   </div>
@@ -132,63 +118,37 @@
     const spreadsheetId = document.getElementById('spreadsheetId');
     const sheetName = document.getElementById('sheetName');
     const fileImageInput = document.getElementById('fileImage');
-
-    const folderId2 = document.getElementById('folderId2');
-    const spreadsheetId2 = document.getElementById('spreadsheetId2');
-    const sheetName2 = document.getElementById('sheetName2');
     const fileImageInput2 = document.getElementById('fileImage2');
-
-    const urlInput = document.getElementById('url');
-    const usernameInput = document.getElementById('username');
-    const passwordInput = document.getElementById('password');
-
     const output = document.getElementById('output');
     const output2 = document.getElementById('output2');
     const loader = document.getElementById('loader');
 
-    document.getElementById('subButton').addEventListener('click', function(e) {
+    document.getElementById('subButton').addEventListener('click', function (e) {
       e.preventDefault();
-      if (!fileImageInput.files[0] || !folderId.value || !spreadsheetId.value || !sheetName.value) {
+      if (!folderId.value || !spreadsheetId.value || !sheetName.value || !fileImageInput.files[0] || !fileImageInput2.files[0]) {
         output.innerHTML = 'Completa todos los campos.';
         return;
       }
-      const fileName = fileImageInput.files[0].name; // Obtener el nombre del archivo correctamente
-      output.innerHTML = fileName;
       loader.style.display = 'inline-block';
-      google.script.run.withSuccessHandler(onSuccess).uploadToDrive(this.parentNode);
-    });
-
-    document.getElementById('subButton2').addEventListener('click', function(e) {
-      e.preventDefault();
-      if (!fileImageInput2.files[0]) {
-        output2.innerHTML = 'Completa todos los campos.';
-        return;
-      }
-      const fileName2 = fileImageInput2.files[0].name; // Obtener el nombre del archivo correctamente
-      output2.innerHTML = fileName2;
-      loader.style.display = 'inline-block';
-      google.script.run.withSuccessHandler(onSuccess2).uploadToWordPress(this.parentNode);
+      google.script.run.withSuccessHandler(onSuccess).uploadToDriveAndWordpress(this.parentNode);
     });
 
     function onSuccess(data) {
       loader.style.display = 'none';
 
-      if (data.status) {
-        output.innerHTML = 'Archivo cargado con éxito <br> <a href="' + data.url + '" target="_blank">' + data.url + '</a>';
-      } else {
-        output.innerHTML = 'Error: ' + data.error;
+      if (data.drive.status) {
+        output.innerHTML = 'Archivo cargado con éxito a drive';
+      } else if (data.drive.error) {
+        output.innerHTML = 'Error en Google Drive: ' + data.drive.error;
+      }
+
+      if (data.wordpress.status) {
+        output2.innerHTML = 'Archivo cargado con éxito a WordPress';
+      } else if (data.wordpress.error) {
+        output2.innerHTML = 'Error en WordPress: ' + data.wordpress.error;
       }
     }
 
-    function onSuccess2(data) {
-      loader.style.display = 'none';
-
-      if (data.status) {
-        output2.innerHTML = 'Archivo cargado con éxito <br> <a href="' + data.url + '" target="_blank">' + data.url + '</a>';
-      } else {
-        output2.innerHTML = 'Error: ' + data.error;
-      }
-    }
   </script>
 </body>
 
