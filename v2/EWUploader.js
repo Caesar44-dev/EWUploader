@@ -11,9 +11,9 @@ function uploadToDriveAndWordpress(data) {
     const driveResponse = uploadToDrive(data);
     const wordpressResponse = uploadToWordPress(data);
 
-    const fileNameWithExtension = data.fileImage.getName();
+    const fileNameWithExtension = data.file.getName();
     const fileNameWithoutExtension = fileNameWithExtension.replace(/\.[^/.]+$/, "");
-    const fileName2WithExtension = data.fileImage2.getName();
+    const fileName2WithExtension = data.file2.getName();
     const fileName2WithoutExtension = fileName2WithExtension.replace(/\.[^/.]+$/, "");
 
     const ss = SpreadsheetApp.openById(data.spreadsheetId);
@@ -24,7 +24,7 @@ function uploadToDriveAndWordpress(data) {
       fileName2WithoutExtension, wordpressResponse.url, new Date()
     ];
     sheet.appendRow(newRowData);
-    
+
     return {
       drive: driveResponse,
       wordpress: wordpressResponse
@@ -40,7 +40,7 @@ function uploadToDriveAndWordpress(data) {
 function uploadToDrive(data) {
   try {
     const folder = DriveApp.getFolderById(data.folderId);
-    const image = folder.createFile(data.fileImage);
+    const image = folder.createFile(data.file);
     image.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
     const response = {
       url: image.getUrl(),
@@ -55,33 +55,23 @@ function uploadToDrive(data) {
   }
 }
 
-function uploadToWordPress(data, ) {
+function uploadToWordPress(data) {
   try {
-    const token = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwczovL25hbnNvbHVjaW9uZXMuY29tL3BydWViYURFIiwiaWF0IjoxNzA1NTA1ODQ2LCJuYmYiOjE3MDU1MDU4NDYsImV4cCI6MTcwNjExMDY0NiwiZGF0YSI6eyJ1c2VyIjp7ImlkIjoiMiJ9fX0.gu6-dBUGkKhRHWZ8w8pgzS_0PIA3h-3Kc5LqF9e6mOA'
+    const authToken = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwczovL25hbnNvbHVjaW9uZXMuY29tL3BydWViYURFIiwiaWF0IjoxNzA1NTA1ODQ2LCJuYmYiOjE3MDU1MDU4NDYsImV4cCI6MTcwNjExMDY0NiwiZGF0YSI6eyJ1c2VyIjp7ImlkIjoiMiJ9fX0.gu6-dBUGkKhRHWZ8w8pgzS_0PIA3h-3Kc5LqF9e6mOA'
     const wordpressApiUrl = `https://nansoluciones.com/pruebaDE/wp-json/wp/v2/media`;
-    const fileNameWithExtension = data.fileImage2.getName();
-    const fileNameWithoutExtension = fileNameWithExtension.replace(/\.[^/.]+$/, "");
-    const fileContent = Utilities.base64Encode(data.fileImage2.getBytes());
-    const payload = {
-      file: fileContent,
-      title: fileNameWithoutExtension,
-      alt_text: fileNameWithoutExtension,
-      caption: 'Subido el ' + new Date().toLocaleString()
-    };
-    const headers = {
-      'Authorization': 'Bearer ' + token,
-      'Content-Disposition': 'attachment; filename="' + fileNameWithoutExtension + '"',
-      'Content-Type': 'application/json'
-    };
+
     const options = {
-      'method': 'post',
-      'headers': headers,
-      'payload': JSON.stringify(payload)
+      method: 'post',
+      headers: {
+        Authorization: `Bearer ${authToken}`,
+        'Content-Disposition': 'attachment; filename=' + data.file2.getName(),
+      },
+      payload: data.file2.getBytes(),
+      contentType: data.file2.getContentType(),
     };
-    
     const response = UrlFetchApp.fetch(wordpressApiUrl, options);
     const responseData = JSON.parse(response.getContentText());
-    const wordpressUrl = responseData.link;
+    const wordpressUrl = responseData.source_url;
     const wordpressResponse = {
       url: wordpressUrl,
       status: true

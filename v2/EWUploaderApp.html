@@ -105,9 +105,9 @@
       <input type="text" name="spreadsheetId" id="spreadsheetId" placeholder="ID de la hoja de cálculo">
       <input type="text" name="sheetName" id="sheetName" placeholder="Nombre de la pestaña">
       <div id="output"></div>
-      <input type="file" name="fileImage" id="fileImage" multiple>
+      <input type="file" name="file" id="file" multiple>
       <div id="output2"></div>
-      <input type="file" name="fileImage2" id="fileImage2" multiple>
+      <input type="file" name="file2" id="file2" multiple>
       <input type="button" id="subButton" value="Enviar">
       <div class="loader" id="loader"></div>
     </form>
@@ -117,15 +117,15 @@
     const folderId = document.getElementById('folderId');
     const spreadsheetId = document.getElementById('spreadsheetId');
     const sheetName = document.getElementById('sheetName');
-    const fileImageInput = document.getElementById('fileImage');
-    const fileImageInput2 = document.getElementById('fileImage2');
+    const fileInput = document.getElementById('file');
+    const fileInput2 = document.getElementById('file2');
     const output = document.getElementById('output');
     const output2 = document.getElementById('output2');
     const loader = document.getElementById('loader');
 
     document.getElementById('subButton').addEventListener('click', function (e) {
       e.preventDefault();
-      if (!folderId.value || !spreadsheetId.value || !sheetName.value || !fileImageInput.files[0] || !fileImageInput2.files[0]) {
+      if (!folderId.value || !spreadsheetId.value || !sheetName.value || !fileInput.files[0] || !fileInput2.files[0]) {
         output.innerHTML = 'Completa todos los campos.';
         return;
       }
