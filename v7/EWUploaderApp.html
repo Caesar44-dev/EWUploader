@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <title>EWUploader</title>
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      margin: 10px;
+      background-color: #f2f2f2;
+    }
+
+    .container {
+      max-width: 400px;
+      margin: 20px auto;
+      background-color: #fff;
+      padding: 20px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      position: relative;
+    }
+
+    h2,
+    h3 {
+      color: #222;
+      text-align: center;
+    }
+
+    form {
+      margin-top: 20px;
+    }
+
+    input[type="file"] {
+      display: none;
+    }
+
+    input[type="button"] {
+      background-color: #3b82f6;
+      color: white;
+      padding: 14px 15px;
+      margin-top: 20px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      width: 100%;
+    }
+
+    input[type="button"]:hover {
+      background-color: #3b82f680;
+    }
+
+    #dropper {
+      border: 2px dashed #ccc;
+      padding: 30px;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .loader {
+      border: 8px solid #f3f3f3;
+      border-top: 8px solid #3498db;
+      border-radius: 50%;
+      width: 30px;
+      height: 30px;
+      animation: spin 1s linear infinite;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      margin-top: -15px;
+      margin-left: -15px;
+      display: none;
+    }
+
+    @keyframes spin {
+      0% {
+        transform: rotate(0deg);
+      }
+
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <h2>EWUploader</h2>
+    <div id="output"></div>
+    <div id="output2"></div>
+    <form id="uploadForm">
+      <div id="dropper" ondrop="drop(event)" ondragover="allowDrop(event)">
+        <p>Arrastra y suelta archivos aquí</p>
+      </div>
+      <label for="file"></label>
+      <input type="file" name="file" id="file" accept="application/pdf">
+      <br>
+      <label for="file2"></label>
+      <input type="file" name="file2" id="file2" accept="application/pdf">
+      <input type="button" id="subButton" value="Enviar">
+      <div class="loader" id="loader"></div>
+    </form>
+  </div>
+  <script>
+    function allowDrop(event) {
+      event.preventDefault();
+      document.getElementById("dropper").style.border = "2px dashed #36f";
+    }
+    function validFiles(files) {
+      const pdf = files.every(file => file.type === "application/pdf");
+      const zip = files.every(file => file.type === "application/zip");
+      const rar = files.every(file => file.type === "application/x-rar-compressed");
+      return (pdf || zip || rar) && files.length;
+    }
+    function drop(event) {
+      event.preventDefault();
+      document.getElementById("dropper").style.border = "2px dashed #ccc";
+      var files = event.dataTransfer.files;
+      if (files.length > 2) {
+        if (validFiles) {
+          var fileList1 = new DataTransfer();
+          var fileList2 = new DataTransfer();
+          fileList1.items.add(files[0]);
+          fileList2.items.add(files[1]);
+          document.getElementById("file").files = fileList1.files;
+          document.querySelector("label[for='file']").innerText = files[0].name;
+          document.getElementById("file2").files = fileList2.files;
+          document.querySelector("label[for='file2']").innerText = files[1].name;
+          document.getElementById("dropper").innerHTML = 'Archivos guardados';
+        } else {
+          document.getElementById("dropper").innerHTML = 'Solo se permiten archivos PDF, RAR y ZIP';
+        }
+      } else {
+        document.getElementById("dropper").innerHTML = 'Arrastra exactamente 2 archivos';
+      }
+    }
+    const fileInput = document.getElementById('file');
+    const fileInput2 = document.getElementById('file2');
+    const output = document.getElementById('output');
+    const output2 = document.getElementById('output2');
+    const loader = document.getElementById('loader');
+    document.getElementById('subButton').addEventListener('click', function (e) {
+      e.preventDefault();
+      if (!fileInput.files[0] || !fileInput2.files[0]) {
+        output.innerHTML = 'Completa todos los campos.';
+        return;
+      }
+      if (!fileInput.files[0].name.toLowerCase().includes('vista') && !fileInput2.files[0].name.toLowerCase().includes('vista')) {
+        document.getElementById("dropper").innerHTML = 'No existe ningún archivo con "vista"';
+        return;
+      } 
+      if (fileInput.files[0].name.toLowerCase().includes('vista') && fileInput2.files[0].name.toLowerCase().includes('vista')) {
+        document.getElementById("dropper").innerHTML = 'Existen dos archivos con "vista"';
+        return;
+      }
+      output.innerHTML = ''
+      output2.innerHTML = ''
+      loader.style.display = 'inline-block';
+      google.script.run.withSuccessHandler(onSuccess).uploadToDriveAndWordpress(this.parentNode);
+    });
+    function onSuccess(data) {
+      loader.style.display = 'none';
+      if (data.drive.status) {
+        output.innerHTML = 'Archivo cargado con éxito a drive';
+        fileInput.value = '';
+        document.querySelector("label[for='file']").innerText = '';
+      } else if (data.drive.error) {
+        output.innerHTML = 'Error en Google Drive: ' + data.drive.error;
+      }
+      if (data.wordpress.status) {
+        output2.innerHTML = 'Archivo cargado con éxito a WordPress';
+        fileInput2.value = '';
+        document.querySelector("label[for='file2']").innerText = '';
+      } else if (data.wordpress.error) {
+        output2.innerHTML = 'Error en WordPress: ' + data.wordpress.error;
+      }
+      document.getElementById("dropper").innerHTML = 'Arrastra y suelta archivos aquí';
+    }
+  </script>
+</body>
+
+</html>
